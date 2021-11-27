@@ -1,6 +1,6 @@
-# PicoSystem 32blit Boilerplate <!-- omit in toc -->
+# Block Blitz
 
-![Build](https://github.com/32blit/32blit-boilerplate/workflows/Build/badge.svg)
+![Build](https://github.com/jbayfield/block-blitz/workflows/Build/badge.svg)
 
 This is a basic template for starting 32blit projects for the Pimoroni PicoSystem.
 

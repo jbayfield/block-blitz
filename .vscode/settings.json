@@ -1,0 +1,6 @@
+{
+    "cmake.configureSettings": {
+      "32BLIT_DIR": "~/32blit-sdk",
+      "PICO_EXTRAS_PATH": "~/pico-extras"
+    },
+  }

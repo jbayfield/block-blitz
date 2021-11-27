@@ -1,10 +1,10 @@
-title: game title
-description: game description
-author: you
+title: Block Blitz
+description: A game inspired by Atari Breakout, for learning the 32blit SDK
+author: Joshua Bayfield
 splash:
   file: assets/no-image.png
 icon:
   file: assets/no-icon.png
 version: v0.0.1
-category: game # game, demo, utility, ...
-url: https://github.com/32blit/32blit-boilerplate
+category: game
+url: https://github.com/jbayfield/block-blitz

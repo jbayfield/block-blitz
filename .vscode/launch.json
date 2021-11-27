@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "name": "Launch and Debug",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+        }
+    ]
+ }
