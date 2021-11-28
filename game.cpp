@@ -7,6 +7,8 @@ const uint8_t BALL_RADIUS = 2;
 
 uint8_t BLOCK_WIDTH;
 uint8_t BLOCK_HEIGHT;
+uint8_t lives = 3;
+uint16_t score = 0;
 
 const Pen blockColours[6] = {
     Pen(197, 76, 81), // Red
@@ -130,6 +132,7 @@ struct Block {
             // The ball is within our bounds
             isActive = false;
             ball.onCollision(blockBounds());
+            score += (6 - rowNum);
         }
     }
 
@@ -194,6 +197,16 @@ void render(uint32_t time) {
     for (Block block : blocks) {
         block.render();
     }
+
+    // Render score and lives info
+    screen.pen = Pen(255, 255, 255);
+    for (int i = 0; i < lives; i++) {
+        screen.circle(Point((i * 8) + 10, 8), BALL_RADIUS);
+    }
+
+    char scoreChar[4];
+    sprintf(scoreChar, "%03d", score);
+    screen.text(scoreChar, minimal_font, Point(screen.bounds.w - 30, 5));
 }
 
 ///////////////////////////////////////////////////////////////////////////
