@@ -9,6 +9,8 @@ uint8_t BLOCK_WIDTH;
 uint8_t BLOCK_HEIGHT;
 uint8_t lives = 3;
 uint16_t score = 0;
+bool launched = false;
+bool gameOver = false;
 
 const Pen blockColours[6] = {
     Pen(197, 76, 81), // Red
@@ -43,7 +45,12 @@ struct Ball {
 
         if (pos.y > screen.bounds.h) {
             // We've gone off the bottom of the screen
-            vel.y *= -1;
+            launched = false;
+            vel = Vec2(0, 0);
+            lives -= 1;
+            if (lives == 0) {
+                gameOver = true;
+            }
         }   
     }
 
@@ -77,8 +84,7 @@ struct Ball {
 // Paddle code
 struct Paddle {
     Vec2 pos;
-    bool launched = false;
-
+    
     Paddle() {
         pos = Vec2(150, 200);
     }
@@ -88,27 +94,29 @@ struct Paddle {
     }
 
     void update(Ball& ball) {
-        if (!launched) {
-            ball.pos = Vec2(pos.x + 15, pos.y - 4);
+        if (!gameOver) {
+            if (!launched) {
+                ball.pos = Vec2(pos.x + 15, pos.y - 4);
 
-            if(pressed(Button::A))
-            {
-                launched = true;
-                ball.vel = Vec2(0.5, -1);
+                if(pressed(Button::A))
+                {
+                    launched = true;
+                    ball.vel = Vec2(0.5, -1);
+                }
             }
-        }
 
-        if (pressed(Button::DPAD_LEFT) && pos.x > 0) {
-            pos.x -= 1;
-        }
+            if (pressed(Button::DPAD_LEFT) && pos.x > 0) {
+                pos.x -= 1;
+            }
 
-        if (pressed(Button::DPAD_RIGHT) && pos.x < (screen.bounds.w - 30)) {
-            pos.x += 1;
-        }
+            if (pressed(Button::DPAD_RIGHT) && pos.x < (screen.bounds.w - 30)) {
+                pos.x += 1;
+            }
 
-        if (paddleBounds().intersects(ball.boundingBox())) {
-            ball.onCollision(paddleBounds());
-        }
+            if (paddleBounds().intersects(ball.boundingBox())) {
+                ball.onCollision(paddleBounds());
+            }
+        } 
     }
 
     void render() {
@@ -155,9 +163,7 @@ Ball ball;
 Ball& ballRef = ball;
 Block blocks[84];
 
-void init() {
-    set_screen_mode(ScreenMode::hires);
-
+void init_blocks() {
     BLOCK_WIDTH = screen.bounds.w / 14;
     BLOCK_HEIGHT = BLOCK_WIDTH / 2;
 
@@ -173,6 +179,11 @@ void init() {
             block_count++;
         }
     }
+}
+
+void init() {
+    set_screen_mode(ScreenMode::hires);
+    init_blocks();    
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -191,22 +202,31 @@ void render(uint32_t time) {
     screen.pen = Pen(0, 0, 0);
     screen.clear();
 
-    // Render all the things
-    paddle.render();
-    ball.render();
-    for (Block block : blocks) {
-        block.render();
-    }
-
-    // Render score and lives info
-    screen.pen = Pen(255, 255, 255);
-    for (int i = 0; i < lives; i++) {
-        screen.circle(Point((i * 8) + 10, 8), BALL_RADIUS);
-    }
-
     char scoreChar[4];
     sprintf(scoreChar, "%03d", score);
-    screen.text(scoreChar, minimal_font, Point(screen.bounds.w - 30, 5));
+
+    if (!gameOver)
+    {
+        // Render all the things
+        paddle.render();
+        ball.render();
+        for (Block block : blocks) {
+            block.render();
+        }
+
+        // Render score and lives info
+        screen.pen = Pen(255, 255, 255);
+        for (int i = 0; i < lives; i++) {
+            screen.circle(Point((i * 8) + 10, 8), BALL_RADIUS);
+        }
+        screen.text(scoreChar, minimal_font, Point(screen.bounds.w - 30, 5));
+    }
+    else {
+        screen.pen = Pen(255, 255, 255);
+        screen.text("GAME OVER", minimal_font, Point(screen.bounds.w / 2 - 20, screen.bounds.h / 2));
+        screen.text(scoreChar, minimal_font, Point(screen.bounds.w / 2 - 5, (screen.bounds.h / 2 + 8)));
+        screen.text("PRESS Y TO CONTINUE", minimal_font, Point(screen.bounds.w / 2 - 40, (screen.bounds.h / 2 + 30)));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -217,9 +237,24 @@ void render(uint32_t time) {
 // amount if milliseconds elapsed since the start of your game
 //
 void update(uint32_t time) {
-    ball.update();
-    paddle.update(ballRef);
-    for (int i = 0; i<84; i++) {
-        blocks[i].update(ballRef);
+    if (gameOver)
+    {
+        if(pressed(Button::Y))
+        {
+            launched = false;
+            score = 0;
+            lives = 4; // For some reason we seem to lose a life on reset - need to find out why
+            for (int i = 0; i<84; i++) {
+                blocks[i].isActive = true;
+            }
+            gameOver = false;
+        } 
+    }
+    else {
+        ball.update();
+        paddle.update(ballRef);
+        for (int i = 0; i<84; i++) {
+            blocks[i].update(ballRef);
+        }
     }
 }
